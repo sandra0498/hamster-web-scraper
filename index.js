@@ -1,10 +1,13 @@
 const puppeteer = require('puppeteer');
+const fs = require('fs');
+
 
 
 
 // URL for data
 const URL = "https://canmypeteatthis.com/what-can-hamsters-eat-your-ultimate-list/"
 
+// const URL = "";
 
 
 const getFoodName = (title) => {
@@ -20,10 +23,8 @@ const getFoodName = (title) => {
 
 }
 
-
 async function scrapeData() {
-
-
+   
    try{
       const browser = await puppeteer.launch(); 
 
@@ -31,28 +32,33 @@ async function scrapeData() {
       await page.goto(URL); 
 
       //59 list items 
+      fs.openSync('results.json', 'w'); 
 
-      for (i = 1; i < 60; i++ ){
-         const [title] = await page.$x(`//*[@id="lcp_instance_0"]/li[${i}]/a[1]`);
+      results = String(); 
+      
+      for (id = 1; id < 60; id++ ){
+         const [title] = await page.$x(`//*[@id="lcp_instance_0"]/li[${id}]/a[1]`);
 
          const  srcTitle = await title.getProperty('textContent');
          const titleTxt = await srcTitle.jsonValue(); 
    
          const foodName = getFoodName(titleTxt); 
 
-         const [el] = await page.$x(`//*[@id="lcp_instance_0"]/li[${i}]/div[1]`);
+         const [el] = await page.$x(`//*[@id="lcp_instance_0"]/li[${id}]/div[1]`);
 
          const src = await el.getProperty('textContent');
 
          const srcTxt = await src.jsonValue(); 
    
-   
-         console.log({foodName, srcTxt});
-
-
-
-
+         const object = {id, foodName, srcTxt}; 
+         
+         results += JSON.stringify(object);
+         results += ' , ';
+         results += '\n';
+         console.log(results); 
+         
       }
+      // fs.writeFileSync('results.json',  results);
 
 
      browser.close(); 
@@ -65,7 +71,6 @@ async function scrapeData() {
 
    }
 }
-
 
 
 scrapeData();
