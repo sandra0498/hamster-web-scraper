@@ -32,9 +32,12 @@ async function scrapeData() {
       await page.goto(URL); 
 
       //59 list items 
-      fs.openSync('results.json', 'w'); 
+      // fs.openSync('results.json', 'a'); 
 
-      results = String(); 
+      let results = "";
+     
+
+      const json = ""; 
       
       for (id = 1; id < 60; id++ ){
          const [title] = await page.$x(`//*[@id="lcp_instance_0"]/li[${id}]/a[1]`);
@@ -52,13 +55,16 @@ async function scrapeData() {
    
          const object = {id, foodName, srcTxt}; 
          
-         results += JSON.stringify(object);
-         results += ' , ';
-         results += '\n';
-         console.log(results); 
+         const jsonString = JSON.stringify(object);
+         let final = results.concat(jsonString, ' , ' , '\n'); 
          
+         // console.log(final);  
+         fs.appendFile('results.json', final , function (err) {
+            if (err) throw err;
+            console.log('Saved!');
+          }); 
       }
-      // fs.writeFileSync('results.json',  results);
+
 
 
      browser.close(); 
